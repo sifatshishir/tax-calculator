@@ -136,7 +136,7 @@ export default function Page() {
         <Container maxWidth="sm"
                    style={{marginTop: '2rem', backgroundColor: '#f0f0f0', padding: '2rem', borderRadius: '8px'}}
         >
-            <Typography variant="h4" gutterBottom>Income Tax Calculator (2024-2025)</Typography>
+            <Typography variant="h4" gutterBottom>Income Tax Calculator (2024-2025) for Bangladesh</Typography>
             <TextField
                 label="Enter Salary (yearly)"
                 type="number"
