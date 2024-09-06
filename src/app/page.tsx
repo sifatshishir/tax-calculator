@@ -1,101 +1,237 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+import { useState } from 'react';
+import * as XLSX from 'xlsx';
+import { calculateIncomeTax, calculateTaxRebate } from '@/utils/taxCalculator';
+import {
+    Button,
+    TextField,
+    Container,
+    Typography,
+    FormControl,
+    InputLabel,
+    Select,
+    MenuItem,
+    IconButton,
+    Grid
+} from '@mui/material';
+import { FaPlus, FaMinus } from 'react-icons/fa';
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+const MAX_INVESTMENT_AMOUNTS = {
+    DPS: 120000,
+    SanchayPatra: 500000,
+    Others: -1
+};
+
+interface Investment {
+    type: string;
+    amount: number;
+    details: string;
+    error: string;
+}
+
+export default function Page() {
+    const [salary, setSalary] = useState<number>(0);
+    const [gender, setGender] = useState<string>('male');
+    const [age, setAge] = useState<number>(0);
+    const [tax, setTax] = useState<number>(0);
+    const [taxableSalary, setTaxableSalary] = useState<number>(0);
+    const [taxRebate, setTaxRebate] = useState<number>(0);
+    const [payableTax, setPayableTax] = useState<number>(0);
+    const [investments, setInvestments] = useState<Investment[]>([{ type: '', amount: 0, details: '', error: '' }]);
+
+    const handleCalculate = () => {
+        const calculatedTax = calculateIncomeTax({ salary, gender, age });
+        const rebate = calculateTaxRebate({ salary, investments });
+        setTax(calculatedTax.tax);
+        setTaxableSalary(calculatedTax.taxableSalary);
+        setTaxRebate(rebate);
+        setPayableTax(calculatedTax.tax - rebate);
+    };
+
+    const handleDownload = () => {
+        const mainData = [
+            { Label: 'Salary', Value: salary },
+            { Label: 'Gender', Value: gender },
+            { Label: 'Age', Value: age },
+            { Label: 'Calculated Tax', Value: tax },
+            { Label: 'Tax Rebate', Value: taxRebate },
+            { Label: 'Tax Payable', Value: payableTax },
+        ];
+
+        const investmentData = investments.map((investment, index) => ({
+            [`Investment ${index + 1} Type`]: investment.type,
+            [`Investment ${index + 1} Amount`]: investment.amount,
+            [`Investment ${index + 1} Details`]: investment.details,
+        }));
+
+        const data = [
+            ...mainData,
+            ...investmentData.flatMap(item => Object.keys(item).map(key => ({ Label: key, Value: item[key] })))
+        ];
+
+        const ws = XLSX.utils.json_to_sheet(data);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Income Tax');
+        XLSX.writeFile(wb, 'Income_Tax_Result.xlsx');
+    };
+
+    const handleInvestmentChange = (index: number, field: keyof Investment, value: string | number) => {
+        const newInvestments = investments.map((investment, i) =>
+            i === index ? { ...investment, [field]: value } : investment
+        );
+        setInvestments(newInvestments);
+    };
+
+    const handleAddInvestment = () => {
+        setInvestments([...investments, { type: '', amount: 0, details: '', error: '' }]);
+    };
+
+    const handleRemoveInvestment = (index: number) => {
+        const newInvestments = investments.filter((_, i) => i !== index);
+        setInvestments(newInvestments);
+    };
+
+    const validateInvestmentAmount = (index: number) => {
+        const investment = investments[index];
+        const amount = Number(investment.amount);
+        const maxAmount = MAX_INVESTMENT_AMOUNTS[investment.type as keyof typeof MAX_INVESTMENT_AMOUNTS];
+
+        if (amount > maxAmount && maxAmount !== -1) {
+            const newInvestments = investments.map((inv, i) =>
+                i === index ? {
+                    ...inv,
+                    amount: maxAmount,
+                    error: `Amount cannot exceed ${maxAmount}`
+                } : inv
+            );
+            setInvestments(newInvestments);
+        } else {
+            handleInvestmentChange(index, 'error', '');
+        }
+    };
+
+    return (
+        <Container maxWidth="sm" style={{ marginTop: '2rem' }}>
+            <Typography variant="h4" gutterBottom>Income Tax Calculator</Typography>
+            <TextField
+                label="Enter Salary"
+                type="number"
+                fullWidth
+                margin="normal"
+                value={salary}
+                onChange={(e) => setSalary(Number(e.target.value))}
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+            <FormControl fullWidth margin="normal">
+                <InputLabel>Gender</InputLabel>
+                <Select
+                    value={gender}
+                    onChange={(e) => setGender(e.target.value)}
+                    label="Gender"
+                >
+                    <MenuItem value="male">Male</MenuItem>
+                    <MenuItem value="female">Female</MenuItem>
+                    <MenuItem value="other">Other</MenuItem>
+                </Select>
+            </FormControl>
+            <TextField
+                label="Enter Age"
+                type="number"
+                fullWidth
+                margin="normal"
+                value={age}
+                onChange={(e) => setAge(Number(e.target.value))}
+            />
+
+            <Typography variant="h6" style={{ marginTop: '1rem' }}>Investments</Typography>
+            {investments.map((investment, index) => (
+                <Grid container spacing={2} alignItems="center" key={index} style={{ marginBottom: '1rem' }}>
+                    <Grid item xs={4}>
+                        <FormControl fullWidth>
+                            <InputLabel>Investment Type</InputLabel>
+                            <Select
+                                value={investment.type}
+                                onChange={(e) => handleInvestmentChange(index, 'type', e.target.value)}
+                                label="Investment Type"
+                            >
+                                <MenuItem value="DPS">DPS</MenuItem>
+                                <MenuItem value="SanchayPatra">Sanchay Patra</MenuItem>
+                                <MenuItem value="Others">Others</MenuItem>
+                            </Select>
+                        </FormControl>
+                    </Grid>
+                    <Grid item xs={4}>
+                        <TextField
+                            label="Investment Amount"
+                            type="number"
+                            fullWidth
+                            value={investment.amount}
+                            onChange={(e) => handleInvestmentChange(index, 'amount', Number(e.target.value))}
+                            onBlur={() => validateInvestmentAmount(index)}
+                            error={!!investment.error}
+                            helperText={investment.error}
+                        />
+                    </Grid>
+                    <Grid item xs={4}>
+                        <TextField
+                            label="Investment Details"
+                            type="text"
+                            fullWidth
+                            value={investment.details}
+                            onChange={(e) => handleInvestmentChange(index, 'details', e.target.value)}
+                        />
+                    </Grid>
+                    <Grid item xs={1}>
+                        <IconButton onClick={() => handleRemoveInvestment(index)} color="error">
+                            <FaMinus />
+                        </IconButton>
+                    </Grid>
+                </Grid>
+            ))}
+            <Button
+                variant="outlined"
+                color="primary"
+                onClick={handleAddInvestment}
+                startIcon={<FaPlus />}
+                style={{ marginBottom: '1rem' }}
+            >
+                Add Investment
+            </Button>
+
+            <div style={{ marginTop: '1rem' }}>
+                <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleCalculate}
+                    style={{ marginRight: '1rem' }}
+                >
+                    Calculate Tax
+                </Button>
+                <Button
+                    variant="contained"
+                    color="secondary"
+                    onClick={handleDownload}
+                    disabled={tax === 0}
+                >
+                    Download Excel
+                </Button>
+            </div>
+
+            {tax !== 0 && (
+                <Typography variant="h6" style={{ marginTop: '1rem' }}>
+                    Taxable Salary: bdt {taxableSalary}
+                    <br />
+                    Calculated Tax: bdt {tax}
+                    <br />
+                    Calculated Rebate: bdt {taxRebate}
+                    <br />
+                    Payable Tax: bdt {payableTax}
+                    <br />
+                    <span style={{ fontWeight: 'bold' }}>
+                        Minimum Payable Tax: bdt 5000
+                    </span>
+                </Typography>
+            )}
+        </Container>
+    );
 }
