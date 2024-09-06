@@ -28,7 +28,7 @@ export const calculateTaxRebate = ({ salary, investments }: RebateProps) => {
     });
     rebate = rebate * 0.15;
 
-    return Math.min(salaryRebate, rebate, maxRebate);
+    return Math.round(Math.min(salaryRebate, rebate, maxRebate));
 };
 
 export const calculateIncomeTax = ({ salary, gender, age }: TaxProps) => {
@@ -64,7 +64,7 @@ export const calculateIncomeTax = ({ salary, gender, age }: TaxProps) => {
     }
 
     return {
-        taxableSalary: salary,
-        tax: tax
+        taxableSalary: Math.round(salary),
+        tax: Math.round(tax)
     };
 };
