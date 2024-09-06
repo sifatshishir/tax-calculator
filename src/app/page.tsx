@@ -31,22 +31,24 @@ interface Investment {
 }
 
 export default function Page() {
-    const [salary, setSalary] = useState<number>(0);
+    const [salary, setSalary] = useState<string>('');
     const [gender, setGender] = useState<string>('male');
-    const [age, setAge] = useState<number>(0);
+    const [age, setAge] = useState<string>('');
     const [tax, setTax] = useState<number>(0);
     const [taxableSalary, setTaxableSalary] = useState<number>(0);
     const [taxRebate, setTaxRebate] = useState<number>(0);
     const [payableTax, setPayableTax] = useState<number>(0);
+    const [showData, setShowData] = useState<boolean>(false);
     const [investments, setInvestments] = useState<Investment[]>([{type: '', amount: 0, details: '', error: ''}]);
 
     const handleCalculate = () => {
-        const calculatedTax = calculateIncomeTax({salary, gender, age});
-        const rebate = calculateTaxRebate({salary, investments});
+        const calculatedTax = calculateIncomeTax({salary: Number(salary), gender, age: Number(age)});
+        const rebate = calculateTaxRebate({salary: Number(salary), investments});
         setTax(calculatedTax.tax);
         setTaxableSalary(calculatedTax.taxableSalary);
         setTaxRebate(rebate);
         setPayableTax(calculatedTax.tax - rebate);
+        setShowData(true);
     };
 
     const handleDownload = () => {
@@ -76,20 +78,38 @@ export default function Page() {
         XLSX.writeFile(wb, 'Income_Tax_Result.xlsx');
     };
 
+    const handleSetSalary = (salary: string) => {
+        setSalary(salary);
+        setShowData(false);
+    };
+
+    const handleSetAge = (age: string) => {
+        setAge(age);
+        setShowData(false);
+    };
+
+    const handleSetGender = (gender: string) => {
+        setGender(gender);
+        setShowData(false);
+    };
+
     const handleInvestmentChange = (index: number, field: keyof Investment, value: string | number) => {
         const newInvestments = investments.map((investment, i) =>
             i === index ? {...investment, [field]: value} : investment
         );
         setInvestments(newInvestments);
+        setShowData(false);
     };
 
     const handleAddInvestment = () => {
         setInvestments([...investments, {type: '', amount: 0, details: '', error: ''}]);
+        setShowData(false);
     };
 
     const handleRemoveInvestment = (index: number) => {
         const newInvestments = investments.filter((_, i) => i !== index);
         setInvestments(newInvestments);
+        setShowData(false);
     };
 
     const validateInvestmentAmount = (index: number) => {
@@ -101,7 +121,7 @@ export default function Page() {
             const newInvestments = investments.map((inv, i) =>
                 i === index ? {
                     ...inv,
-                    amount: maxAmount,
+                    amount: amount,
                     error: `Amount cannot exceed ${maxAmount}`
                 } : inv
             );
@@ -109,6 +129,7 @@ export default function Page() {
         } else {
             handleInvestmentChange(index, 'error', '');
         }
+        setShowData(false);
     };
 
     return (
@@ -117,18 +138,18 @@ export default function Page() {
         >
             <Typography variant="h4" gutterBottom>Income Tax Calculator</Typography>
             <TextField
-                label="Enter Salary"
+                label="Enter Salary (yearly)"
                 type="number"
                 fullWidth
                 margin="normal"
                 value={salary}
-                onChange={(e) => setSalary(Number(e.target.value))}
+                onChange={(e) => handleSetSalary(e.target.value)}
             />
             <FormControl fullWidth margin="normal">
                 <InputLabel>Gender</InputLabel>
                 <Select
                     value={gender}
-                    onChange={(e) => setGender(e.target.value)}
+                    onChange={(e) => handleSetGender(e.target.value)}
                     label="Gender"
                 >
                     <MenuItem value="male">Male</MenuItem>
@@ -142,7 +163,7 @@ export default function Page() {
                 fullWidth
                 margin="normal"
                 value={age}
-                onChange={(e) => setAge(Number(e.target.value))}
+                onChange={(e) => handleSetAge(e.target.value)}
             />
 
             <Typography variant="h6" style={{marginTop: '1rem'}}>Investments</Typography>
@@ -219,7 +240,7 @@ export default function Page() {
                 </Button>
             </div>
 
-            {tax !== 0 && (
+            {showData && salary !== '' && (
                 <Typography variant="h6" style={{marginTop: '1rem'}}>
                     Taxable Salary: bdt {taxableSalary}
                     <br/>

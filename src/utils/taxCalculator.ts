@@ -17,6 +17,9 @@ interface RebateProps {
 
 export const calculateTaxRebate = ({ salary, investments }: RebateProps) => {
     let rebate = 0;
+    if (salary <= 350000) {
+        return 0;
+    }
     const salaryRebate = salary * 0.03;
     const maxRebate = 1000000;
 
@@ -31,6 +34,13 @@ export const calculateTaxRebate = ({ salary, investments }: RebateProps) => {
 export const calculateIncomeTax = ({ salary, gender, age }: TaxProps) => {
     let tax;
     const maxSalAdjustment = 450000;
+
+    if (salary <= 350000) {
+        return {
+            tax: 0,
+            taxableSalary: 0
+        }
+    }
 
     salary -= Math.min(maxSalAdjustment, salary / 3);
     const taxFreeAmount = (age >= 65 || gender === 'female') ? 400000 : (gender === 'other' ? 475000 : 350000);
