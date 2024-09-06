@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import {useState} from 'react';
 import * as XLSX from 'xlsx';
-import { calculateIncomeTax, calculateTaxRebate } from '@/utils/taxCalculator';
+import {calculateIncomeTax, calculateTaxRebate} from '@/utils/taxCalculator';
 import {
     Button,
     TextField,
@@ -15,7 +15,7 @@ import {
     IconButton,
     Grid
 } from '@mui/material';
-import { FaPlus, FaMinus } from 'react-icons/fa';
+import {FaPlus, FaMinus} from 'react-icons/fa';
 
 const MAX_INVESTMENT_AMOUNTS = {
     DPS: 120000,
@@ -38,11 +38,11 @@ export default function Page() {
     const [taxableSalary, setTaxableSalary] = useState<number>(0);
     const [taxRebate, setTaxRebate] = useState<number>(0);
     const [payableTax, setPayableTax] = useState<number>(0);
-    const [investments, setInvestments] = useState<Investment[]>([{ type: '', amount: 0, details: '', error: '' }]);
+    const [investments, setInvestments] = useState<Investment[]>([{type: '', amount: 0, details: '', error: ''}]);
 
     const handleCalculate = () => {
-        const calculatedTax = calculateIncomeTax({ salary, gender, age });
-        const rebate = calculateTaxRebate({ salary, investments });
+        const calculatedTax = calculateIncomeTax({salary, gender, age});
+        const rebate = calculateTaxRebate({salary, investments});
         setTax(calculatedTax.tax);
         setTaxableSalary(calculatedTax.taxableSalary);
         setTaxRebate(rebate);
@@ -51,12 +51,12 @@ export default function Page() {
 
     const handleDownload = () => {
         const mainData = [
-            { Label: 'Salary', Value: salary },
-            { Label: 'Gender', Value: gender },
-            { Label: 'Age', Value: age },
-            { Label: 'Calculated Tax', Value: tax },
-            { Label: 'Tax Rebate', Value: taxRebate },
-            { Label: 'Tax Payable', Value: payableTax },
+            {Label: 'Salary', Value: salary},
+            {Label: 'Gender', Value: gender},
+            {Label: 'Age', Value: age},
+            {Label: 'Calculated Tax', Value: tax},
+            {Label: 'Tax Rebate', Value: taxRebate},
+            {Label: 'Tax Payable', Value: payableTax},
         ];
 
         const investmentData = investments.map((investment, index) => ({
@@ -67,7 +67,7 @@ export default function Page() {
 
         const data = [
             ...mainData,
-            ...investmentData.flatMap(item => Object.keys(item).map(key => ({ Label: key, Value: item[key] })))
+            ...investmentData.flatMap(item => Object.keys(item).map(key => ({Label: key, Value: item[key]})))
         ];
 
         const ws = XLSX.utils.json_to_sheet(data);
@@ -78,13 +78,13 @@ export default function Page() {
 
     const handleInvestmentChange = (index: number, field: keyof Investment, value: string | number) => {
         const newInvestments = investments.map((investment, i) =>
-            i === index ? { ...investment, [field]: value } : investment
+            i === index ? {...investment, [field]: value} : investment
         );
         setInvestments(newInvestments);
     };
 
     const handleAddInvestment = () => {
-        setInvestments([...investments, { type: '', amount: 0, details: '', error: '' }]);
+        setInvestments([...investments, {type: '', amount: 0, details: '', error: ''}]);
     };
 
     const handleRemoveInvestment = (index: number) => {
@@ -112,7 +112,9 @@ export default function Page() {
     };
 
     return (
-        <Container maxWidth="sm" style={{ marginTop: '2rem' }}>
+        <Container maxWidth="sm"
+                   style={{marginTop: '2rem', backgroundColor: '#f0f0f0', padding: '2rem', borderRadius: '8px'}}
+        >
             <Typography variant="h4" gutterBottom>Income Tax Calculator</Typography>
             <TextField
                 label="Enter Salary"
@@ -143,9 +145,9 @@ export default function Page() {
                 onChange={(e) => setAge(Number(e.target.value))}
             />
 
-            <Typography variant="h6" style={{ marginTop: '1rem' }}>Investments</Typography>
+            <Typography variant="h6" style={{marginTop: '1rem'}}>Investments</Typography>
             {investments.map((investment, index) => (
-                <Grid container spacing={2} alignItems="center" key={index} style={{ marginBottom: '1rem' }}>
+                <Grid container spacing={2} alignItems="center" key={index} style={{marginBottom: '1rem'}}>
                     <Grid item xs={4}>
                         <FormControl fullWidth>
                             <InputLabel>Investment Type</InputLabel>
@@ -183,7 +185,7 @@ export default function Page() {
                     </Grid>
                     <Grid item xs={1}>
                         <IconButton onClick={() => handleRemoveInvestment(index)} color="error">
-                            <FaMinus />
+                            <FaMinus/>
                         </IconButton>
                     </Grid>
                 </Grid>
@@ -192,18 +194,18 @@ export default function Page() {
                 variant="outlined"
                 color="primary"
                 onClick={handleAddInvestment}
-                startIcon={<FaPlus />}
-                style={{ marginBottom: '1rem' }}
+                startIcon={<FaPlus/>}
+                style={{marginBottom: '1rem'}}
             >
                 Add Investment
             </Button>
 
-            <div style={{ marginTop: '1rem' }}>
+            <div style={{marginTop: '1rem'}}>
                 <Button
                     variant="contained"
                     color="primary"
                     onClick={handleCalculate}
-                    style={{ marginRight: '1rem' }}
+                    style={{marginRight: '1rem'}}
                 >
                     Calculate Tax
                 </Button>
@@ -218,16 +220,16 @@ export default function Page() {
             </div>
 
             {tax !== 0 && (
-                <Typography variant="h6" style={{ marginTop: '1rem' }}>
+                <Typography variant="h6" style={{marginTop: '1rem'}}>
                     Taxable Salary: bdt {taxableSalary}
-                    <br />
+                    <br/>
                     Calculated Tax: bdt {tax}
-                    <br />
+                    <br/>
                     Calculated Rebate: bdt {taxRebate}
-                    <br />
+                    <br/>
                     Payable Tax: bdt {payableTax}
-                    <br />
-                    <span style={{ fontWeight: 'bold' }}>
+                    <br/>
+                    <span style={{fontWeight: 'bold'}}>
                         Minimum Payable Tax: bdt 5000
                     </span>
                 </Typography>
