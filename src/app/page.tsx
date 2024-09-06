@@ -25,7 +25,7 @@ const MAX_INVESTMENT_AMOUNTS = {
 
 interface Investment {
     type: string;
-    amount: number;
+    amount: string;
     details: string;
     error: string;
 }
@@ -39,7 +39,7 @@ export default function Page() {
     const [taxRebate, setTaxRebate] = useState<number>(0);
     const [payableTax, setPayableTax] = useState<number>(0);
     const [showData, setShowData] = useState<boolean>(false);
-    const [investments, setInvestments] = useState<Investment[]>([{type: '', amount: 0, details: '', error: ''}]);
+    const [investments, setInvestments] = useState<Investment[]>([{type: '', amount: '', details: '', error: ''}]);
 
     const handleCalculate = () => {
         const calculatedTax = calculateIncomeTax({salary: Number(salary), gender, age: Number(age)});
@@ -102,7 +102,7 @@ export default function Page() {
     };
 
     const handleAddInvestment = () => {
-        setInvestments([...investments, {type: '', amount: 0, details: '', error: ''}]);
+        setInvestments([...investments, {type: '', amount: '', details: '', error: ''}]);
         setShowData(false);
     };
 
@@ -114,10 +114,10 @@ export default function Page() {
 
     const validateInvestmentAmount = (index: number) => {
         const investment = investments[index];
-        const amount = Number(investment.amount);
+        const amount = investment.amount;
         const maxAmount = MAX_INVESTMENT_AMOUNTS[investment.type as keyof typeof MAX_INVESTMENT_AMOUNTS];
 
-        if (amount > maxAmount && maxAmount !== -1) {
+        if (Number(amount) > maxAmount && maxAmount !== -1) {
             const newInvestments = investments.map((inv, i) =>
                 i === index ? {
                     ...inv,

@@ -6,7 +6,7 @@ interface TaxProps {
 
 interface Investment {
     type: string;
-    amount: number;
+    amount: string;
     details: string;
 }
 
