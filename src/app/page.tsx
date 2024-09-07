@@ -1,6 +1,6 @@
 'use client';
 
-import {useState} from 'react';
+import {useState, useEffect} from 'react';
 import * as XLSX from 'xlsx';
 import {calculateIncomeTax, calculateTaxRebate} from '@/utils/taxCalculator';
 import {
@@ -67,6 +67,22 @@ export default function Page() {
     const [isIncomesOpen, setIsIncomesOpen] = useState<boolean>(true);
     const [isTaxPayedOpen, setIsTaxPayedOpen] = useState<boolean>(true);
 
+
+    useEffect(() => {
+        if (salary !== '' && totalIncome !== '') {
+            const calculatedTax = calculateIncomeTax({salary: Number(totalIncome), gender, age: Number(age)});
+            setTax(calculatedTax.tax);
+            setTaxableIncome(calculatedTax.taxableIncome);
+
+            const rebate = calculateTaxRebate({taxableIncome: taxableIncome, investments});
+
+            setTaxRebate(rebate);
+            setPayableTax(calculatedTax.tax - rebate);
+            setShowData(true);
+        }
+    }, [totalIncome, taxableIncome, investments, age, gender, salary]);
+
+
     const handleCalculate = () => {
         let allIncomes = Number(salary);
         otherIncomes.forEach(incomeData => {
@@ -79,16 +95,6 @@ export default function Page() {
             paidTaxes += Number(taxData.amount);
         });
         setTaxPaid(paidTaxes);
-
-        const calculatedTax = calculateIncomeTax({salary: Number(totalIncome), gender, age: Number(age)});
-        setTax(calculatedTax.tax);
-        setTaxableIncome(calculatedTax.taxableIncome);
-
-        const rebate = calculateTaxRebate({taxableIncome: taxableIncome, investments});
-
-        setTaxRebate(rebate);
-        setPayableTax(calculatedTax.tax - rebate);
-        setShowData(true);
     };
 
     const handleDownload = () => {
@@ -432,7 +438,7 @@ export default function Page() {
                 endIcon={isTaxPayedOpen ? <FaChevronUp/> : <FaChevronDown/>}
                 style={{marginTop: '1rem'}}
             >
-                {isTaxPayedOpen ? 'Hide Other Incomes' : 'Show Other Incomes'}
+                {isTaxPayedOpen ? 'Hide Paid Taxes' : 'Show Paid Taxes'}
             </Button>
 
             <Collapse in={isTaxPayedOpen}>
