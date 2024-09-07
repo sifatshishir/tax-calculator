@@ -13,9 +13,10 @@ import {
     Select,
     MenuItem,
     IconButton,
-    Grid
+    Grid,
+    Collapse
 } from '@mui/material';
-import {FaPlus, FaMinus} from 'react-icons/fa';
+import {FaPlus, FaMinus, FaChevronDown, FaChevronUp} from 'react-icons/fa';
 
 const MAX_INVESTMENT_AMOUNTS = {
     DPS: 120000,
@@ -30,22 +31,61 @@ interface Investment {
     error: string;
 }
 
+interface OtherIncomes {
+    type: string;
+    amount: string;
+    details: string;
+    error: string;
+}
+
+interface TaxPayed {
+    type: string;
+    amount: string;
+    details: string;
+    error: string;
+}
+
 export default function Page() {
     const [salary, setSalary] = useState<string>('');
+    const [totalIncome, setTotalIncome] = useState<string>('');
+
     const [gender, setGender] = useState<string>('male');
     const [age, setAge] = useState<string>('');
+
     const [tax, setTax] = useState<number>(0);
-    const [taxableSalary, setTaxableSalary] = useState<number>(0);
+    const [taxableIncome, setTaxableIncome] = useState<number>(0);
     const [taxRebate, setTaxRebate] = useState<number>(0);
+    const [taxPaid, setTaxPaid] = useState<number>(0);
     const [payableTax, setPayableTax] = useState<number>(0);
     const [showData, setShowData] = useState<boolean>(false);
+
     const [investments, setInvestments] = useState<Investment[]>([{type: '', amount: '', details: '', error: ''}]);
+    const [otherIncomes, setOtherIncomes] = useState<OtherIncomes[]>([{type: '', amount: '', details: '', error: ''}]);
+    const [taxPayed, setTaxPayed] = useState<TaxPayed[]>([{type: '', amount: '', details: '', error: ''}]);
+
+    const [isInvestmentsOpen, setIsInvestmentsOpen] = useState<boolean>(true);
+    const [isIncomesOpen, setIsIncomesOpen] = useState<boolean>(true);
+    const [isTaxPayedOpen, setIsTaxPayedOpen] = useState<boolean>(true);
 
     const handleCalculate = () => {
-        const calculatedTax = calculateIncomeTax({salary: Number(salary), gender, age: Number(age)});
-        const rebate = calculateTaxRebate({salary: Number(salary), investments});
+        let allIncomes = Number(salary);
+        otherIncomes.forEach(incomeData => {
+            allIncomes += Number(incomeData.amount);
+        });
+        setTotalIncome(String(allIncomes));
+
+        let paidTaxes = 0;
+        taxPayed.forEach(taxData => {
+            paidTaxes += Number(taxData.amount);
+        });
+        setTaxPaid(paidTaxes);
+
+        const calculatedTax = calculateIncomeTax({salary: Number(totalIncome), gender, age: Number(age)});
         setTax(calculatedTax.tax);
-        setTaxableSalary(calculatedTax.taxableSalary);
+        setTaxableIncome(calculatedTax.taxableIncome);
+
+        const rebate = calculateTaxRebate({taxableIncome: taxableIncome, investments});
+
         setTaxRebate(rebate);
         setPayableTax(calculatedTax.tax - rebate);
         setShowData(true);
@@ -56,8 +96,11 @@ export default function Page() {
             {Label: 'Salary', Value: salary},
             {Label: 'Gender', Value: gender},
             {Label: 'Age', Value: age},
+            {Label: 'Total Income', Value: totalIncome},
+            {Label: 'Taxable Income', Value: taxableIncome},
             {Label: 'Calculated Tax', Value: tax},
             {Label: 'Tax Rebate', Value: taxRebate},
+            {Label: 'Tax Already Paid', Value: taxPaid},
             {Label: 'Tax Payable', Value: payableTax},
         ];
 
@@ -67,9 +110,16 @@ export default function Page() {
             [`Investment ${index + 1} Details`]: investment.details,
         }));
 
+        const otherIncomeData = otherIncomes.map((income, index) => ({
+            [`Income ${index + 1} Type`]: income.type,
+            [`Income ${index + 1} Amount`]: income.amount,
+            [`Income ${index + 1} Details`]: income.details,
+        }));
+
         const data = [
             ...mainData,
-            ...investmentData.flatMap(item => Object.keys(item).map(key => ({Label: key, Value: item[key]})))
+            ...investmentData.flatMap(item => Object.keys(item).map(key => ({Label: key, Value: item[key]}))),
+            ...otherIncomeData.flatMap(item => Object.keys(item).map(key => ({Label: key, Value: item[key]}))),
         ];
 
         const ws = XLSX.utils.json_to_sheet(data);
@@ -132,6 +182,77 @@ export default function Page() {
         setShowData(false);
     };
 
+
+    const handleIncomeChange = (index: number, field: keyof OtherIncomes, value: string | number) => {
+        const newIncomes = otherIncomes.map((income, i) =>
+            i === index ? {...income, [field]: value} : income
+        );
+        setOtherIncomes(newIncomes);
+        setShowData(false);
+    };
+
+    const handleAddIncome = () => {
+        setOtherIncomes([...otherIncomes, {type: '', amount: '', details: '', error: ''}]);
+        setShowData(false);
+    };
+
+    const handleRemoveIncome = (index: number) => {
+        const newIncomes = otherIncomes.filter((_, i) => i !== index);
+        setOtherIncomes(newIncomes);
+        setShowData(false);
+    };
+
+    const validateIncomeAmount = (index: number) => {
+        const income = otherIncomes[index];
+        const amount = income.amount;
+
+        const newIncomes = otherIncomes.map((income, i) =>
+            i === index ? {
+                ...income,
+                amount: amount,
+                error: ''
+            } : income
+        );
+        setOtherIncomes(newIncomes);
+
+        setShowData(false);
+    };
+
+
+    const handleTaxPayedChange = (index: number, field: keyof TaxPayed, value: string | number) => {
+        const newTaxes = taxPayed.map((tax, i) =>
+            i === index ? {...tax, [field]: value} : tax
+        );
+        setTaxPayed(newTaxes);
+        setShowData(false);
+    };
+
+    const handleAddTaxPayed = () => {
+        setTaxPayed([...taxPayed, {type: '', amount: '', details: '', error: ''}]);
+        setShowData(false);
+    };
+
+    const handleRemoveTaxPayed = (index: number) => {
+        const newTaxes = taxPayed.filter((_, i) => i !== index);
+        setTaxPayed(newTaxes);
+        setShowData(false);
+    };
+
+    const validateTaxPayedAmount = (index: number) => {
+        const tax = taxPayed[index];
+        const amount = tax.amount;
+
+        const newTaxes = taxPayed.map((tax, i) =>
+            i === index ? {
+                ...tax,
+                amount: amount,
+                error: ''
+            } : tax
+        );
+        setTaxPayed(newTaxes);
+
+        setShowData(false);
+    };
     return (
         <Container maxWidth="sm"
                    style={{marginTop: '2rem', backgroundColor: '#f0f0f0', padding: '2rem', borderRadius: '8px'}}
@@ -166,60 +287,211 @@ export default function Page() {
                 onChange={(e) => handleSetAge(e.target.value)}
             />
 
-            <Typography variant="h6" style={{marginTop: '1rem'}}>Investments</Typography>
-            {investments.map((investment, index) => (
-                <Grid container spacing={2} alignItems="center" key={index} style={{marginBottom: '1rem'}}>
-                    <Grid item xs={4}>
-                        <FormControl fullWidth>
-                            <InputLabel>Investment Type</InputLabel>
-                            <Select
-                                value={investment.type}
-                                onChange={(e) => handleInvestmentChange(index, 'type', e.target.value)}
-                                label="Investment Type"
-                            >
-                                <MenuItem value="DPS">DPS</MenuItem>
-                                <MenuItem value="SanchayPatra">Sanchay Patra</MenuItem>
-                                <MenuItem value="Others">Others</MenuItem>
-                            </Select>
-                        </FormControl>
-                    </Grid>
-                    <Grid item xs={4}>
-                        <TextField
-                            label="Investment Amount"
-                            type="number"
-                            fullWidth
-                            value={investment.amount}
-                            onChange={(e) => handleInvestmentChange(index, 'amount', Number(e.target.value))}
-                            onBlur={() => validateInvestmentAmount(index)}
-                            error={!!investment.error}
-                            helperText={investment.error}
-                        />
-                    </Grid>
-                    <Grid item xs={4}>
-                        <TextField
-                            label="Investment Details"
-                            type="text"
-                            fullWidth
-                            value={investment.details}
-                            onChange={(e) => handleInvestmentChange(index, 'details', e.target.value)}
-                        />
-                    </Grid>
-                    <Grid item xs={1}>
-                        <IconButton onClick={() => handleRemoveInvestment(index)} color="error">
-                            <FaMinus/>
-                        </IconButton>
-                    </Grid>
-                </Grid>
-            ))}
+            {/*Other incomes data*/}
             <Button
                 variant="outlined"
                 color="primary"
-                onClick={handleAddInvestment}
-                startIcon={<FaPlus/>}
-                style={{marginBottom: '1rem'}}
+                onClick={() => setIsIncomesOpen(!isIncomesOpen)}
+                endIcon={isIncomesOpen ? <FaChevronUp/> : <FaChevronDown/>}
+                style={{marginTop: '1rem'}}
             >
-                Add Investment
+                {isIncomesOpen ? 'Hide Other Incomes' : 'Show Other Incomes'}
             </Button>
+
+            <Collapse in={isIncomesOpen}>
+                <div style={{marginTop: '1rem'}}>
+                    {otherIncomes.map((income, index) => (
+                        <Grid container spacing={2} alignItems="center" key={index} style={{marginBottom: '1rem'}}>
+                            <Grid item xs={4}>
+                                <FormControl fullWidth>
+                                    <InputLabel>Income Type</InputLabel>
+                                    <Select
+                                        value={income.type}
+                                        onChange={(e) => handleIncomeChange(index, 'type', e.target.value)}
+                                        label="Income Type"
+                                    >
+                                        <MenuItem value="BankReturn">Bank Return</MenuItem>
+                                        <MenuItem value="Others">Others</MenuItem>
+                                    </Select>
+                                </FormControl>
+                            </Grid>
+                            <Grid item xs={4}>
+                                <TextField
+                                    label="Income Amount"
+                                    type="number"
+                                    fullWidth
+                                    value={income.amount}
+                                    onChange={(e) => handleIncomeChange(index, 'amount', Number(e.target.value))}
+                                    onBlur={() => validateIncomeAmount(index)}
+                                    error={!!income.error}
+                                    helperText={income.error}
+                                />
+                            </Grid>
+                            <Grid item xs={4}>
+                                <TextField
+                                    label="Income Details"
+                                    type="text"
+                                    fullWidth
+                                    value={income.details}
+                                    onChange={(e) => handleIncomeChange(index, 'details', e.target.value)}
+                                />
+                            </Grid>
+                            <Grid item xs={1}>
+                                <IconButton onClick={() => handleRemoveIncome(index)} color="error">
+                                    <FaMinus/>
+                                </IconButton>
+                            </Grid>
+                        </Grid>
+                    ))}
+                    <Button
+                        variant="outlined"
+                        color="primary"
+                        onClick={handleAddIncome}
+                        startIcon={<FaPlus/>}
+                        style={{marginBottom: '1rem'}}
+                    >
+                        Add Income
+                    </Button>
+                </div>
+            </Collapse>
+
+            {/*Investment data*/}
+            <Button
+                variant="outlined"
+                color="primary"
+                onClick={() => setIsInvestmentsOpen(!isInvestmentsOpen)}
+                endIcon={isInvestmentsOpen ? <FaChevronUp/> : <FaChevronDown/>}
+                style={{marginTop: '1rem'}}
+            >
+                {isInvestmentsOpen ? 'Hide Investments' : 'Show Investments'}
+            </Button>
+
+            <Collapse in={isInvestmentsOpen}>
+                <div style={{marginTop: '1rem'}}>
+                    {investments.map((investment, index) => (
+                        <Grid container spacing={2} alignItems="center" key={index} style={{marginBottom: '1rem'}}>
+                            <Grid item xs={4}>
+                                <FormControl fullWidth>
+                                    <InputLabel>Investment Type</InputLabel>
+                                    <Select
+                                        value={investment.type}
+                                        onChange={(e) => handleInvestmentChange(index, 'type', e.target.value)}
+                                        label="Investment Type"
+                                    >
+                                        <MenuItem value="DPS">DPS</MenuItem>
+                                        <MenuItem value="SanchayPatra">Sanchay Patra</MenuItem>
+                                        <MenuItem value="Others">Others</MenuItem>
+                                    </Select>
+                                </FormControl>
+                            </Grid>
+                            <Grid item xs={4}>
+                                <TextField
+                                    label="Investment Amount"
+                                    type="number"
+                                    fullWidth
+                                    value={investment.amount}
+                                    onChange={(e) => handleInvestmentChange(index, 'amount', Number(e.target.value))}
+                                    onBlur={() => validateInvestmentAmount(index)}
+                                    error={!!investment.error}
+                                    helperText={investment.error}
+                                />
+                            </Grid>
+                            <Grid item xs={4}>
+                                <TextField
+                                    label="Investment Details"
+                                    type="text"
+                                    fullWidth
+                                    value={investment.details}
+                                    onChange={(e) => handleInvestmentChange(index, 'details', e.target.value)}
+                                />
+                            </Grid>
+                            <Grid item xs={1}>
+                                <IconButton onClick={() => handleRemoveInvestment(index)} color="error">
+                                    <FaMinus/>
+                                </IconButton>
+                            </Grid>
+                        </Grid>
+                    ))}
+                    <Button
+                        variant="outlined"
+                        color="primary"
+                        onClick={handleAddInvestment}
+                        startIcon={<FaPlus/>}
+                        style={{marginBottom: '1rem'}}
+                    >
+                        Add Investment
+                    </Button>
+                </div>
+            </Collapse>
+
+            {/*Tax Payed data*/}
+            <Button
+                variant="outlined"
+                color="primary"
+                onClick={() => setIsTaxPayedOpen(!isTaxPayedOpen)}
+                endIcon={isTaxPayedOpen ? <FaChevronUp/> : <FaChevronDown/>}
+                style={{marginTop: '1rem'}}
+            >
+                {isTaxPayedOpen ? 'Hide Other Incomes' : 'Show Other Incomes'}
+            </Button>
+
+            <Collapse in={isTaxPayedOpen}>
+                <div style={{marginTop: '1rem'}}>
+                    {taxPayed.map((tax, index) => (
+                        <Grid container spacing={2} alignItems="center" key={index} style={{marginBottom: '1rem'}}>
+                            <Grid item xs={4}>
+                                <FormControl fullWidth>
+                                    <InputLabel>Paid Tax Type</InputLabel>
+                                    <Select
+                                        value={tax.type}
+                                        onChange={(e) => handleTaxPayedChange(index, 'type', e.target.value)}
+                                        label="Paid Tax Type"
+                                    >
+                                        <MenuItem value="tds">Tax Deduction at Source</MenuItem>
+                                        <MenuItem value="BankReturn">Bank Return</MenuItem>
+                                        <MenuItem value="Others">Others</MenuItem>
+                                    </Select>
+                                </FormControl>
+                            </Grid>
+                            <Grid item xs={4}>
+                                <TextField
+                                    label="Paid Tax Amount"
+                                    type="number"
+                                    fullWidth
+                                    value={tax.amount}
+                                    onChange={(e) => handleTaxPayedChange(index, 'amount', Number(e.target.value))}
+                                    onBlur={() => validateTaxPayedAmount(index)}
+                                    error={!!tax.error}
+                                    helperText={tax.error}
+                                />
+                            </Grid>
+                            <Grid item xs={4}>
+                                <TextField
+                                    label="Paid Tax Details"
+                                    type="text"
+                                    fullWidth
+                                    value={tax.details}
+                                    onChange={(e) => handleTaxPayedChange(index, 'details', e.target.value)}
+                                />
+                            </Grid>
+                            <Grid item xs={1}>
+                                <IconButton onClick={() => handleRemoveTaxPayed(index)} color="error">
+                                    <FaMinus/>
+                                </IconButton>
+                            </Grid>
+                        </Grid>
+                    ))}
+                    <Button
+                        variant="outlined"
+                        color="primary"
+                        onClick={handleAddTaxPayed}
+                        startIcon={<FaPlus/>}
+                        style={{marginBottom: '1rem'}}
+                    >
+                        Add Tax
+                    </Button>
+                </div>
+            </Collapse>
 
             <div style={{marginTop: '1rem'}}>
                 <Button
@@ -242,13 +514,20 @@ export default function Page() {
 
             {showData && salary !== '' && (
                 <Typography variant="h6" style={{marginTop: '1rem'}}>
-                    Taxable Salary: bdt {taxableSalary}
+                    Total Income: bdt {totalIncome}
+                    <br/>
+                    Taxable Income: bdt {taxableIncome}
+                    <br/>
                     <br/>
                     Calculated Tax: bdt {tax}
                     <br/>
                     Calculated Rebate: bdt {taxRebate}
                     <br/>
+                    <br/>
+                    Tax Paid: bdt {taxPaid}
+                    <br/>
                     Payable Tax: bdt {payableTax}
+                    <br/>
                     <br/>
                     <span style={{fontWeight: 'bold'}}>
                         Minimum Payable Tax: bdt 5000

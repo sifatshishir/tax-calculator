@@ -3,9 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="52140a33-f9a6-4fcc-a847-1e9f6d5e49eb" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/layout.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/utils/taxCalculator.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/taxCalculator.ts" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/node_modules/" />
@@ -23,10 +21,19 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/app/page.tsx">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="301">
-              <caret line="125" column="23" lean-forward="true" selection-start-line="125" selection-start-column="23" selection-end-line="125" selection-end-column="23" />
+            <state relative-caret-position="461">
+              <caret line="529" column="25" lean-forward="true" selection-start-line="529" selection-start-column="25" selection-end-line="529" selection-end-column="25" />
               <folding>
                 <element signature="e#15#46#0" expanded="true" />
+                <element signature="e#3076#3299#0" />
+                <element signature="e#3340#3465#0" />
+                <element signature="e#3522#3671#0" />
+                <element signature="e#3730#4411#0" />
+                <element signature="e#5208#5431#0" />
+                <element signature="e#5472#5597#0" />
+                <element signature="e#5654#5803#0" />
+                <element signature="e#6824#9916#0" />
+                <element signature="e#6163#9263#0" />
               </folding>
             </state>
           </provider>
@@ -35,7 +42,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/app/layout.tsx">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="206">
+            <state relative-caret-position="660">
               <caret line="34" column="25" selection-start-line="34" selection-start-column="25" selection-end-line="34" selection-end-column="25" />
               <folding>
                 <element signature="e#0#37#0" expanded="true" />
@@ -47,8 +54,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/utils/taxCalculator.ts">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="176">
-              <caret line="8" column="18" selection-start-line="8" selection-start-column="18" selection-end-line="8" selection-end-column="18" />
+            <state relative-caret-position="154">
+              <caret line="22" column="38" selection-start-line="22" selection-start-column="38" selection-end-line="22" selection-end-column="38" />
             </state>
           </provider>
         </entry>
@@ -65,7 +72,13 @@
   <component name="FindInProjectRecents">
     <findStrings>
       <find>payableTax</find>
+      <find>taxableSalary</find>
+      <find>setTaxableSalary</find>
     </findStrings>
+    <replaceStrings>
+      <replace>taxableIncome</replace>
+      <replace>setTaxableIncome</replace>
+    </replaceStrings>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -80,7 +93,7 @@
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="953" />
+    <option name="x" value="-7" />
     <option name="width" value="974" />
     <option name="height" value="1047" />
   </component>
@@ -150,15 +163,17 @@
       <option name="presentableId" value="Default" />
       <updated>1725628461452</updated>
       <workItem from="1725628463069" duration="3557000" />
-      <workItem from="1725633303670" duration="2694000" />
+      <workItem from="1725633303670" duration="3353000" />
+      <workItem from="1725679017105" duration="4326000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="6251000" />
+    <option name="totallyTimeSpent" value="11236000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
+    <frame x="-7" y="0" width="974" height="1047" extended-state="0" />
+    <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" weight="0.25320512" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
@@ -173,9 +188,9 @@
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Version Control" order="8" />
-      <window_info anchor="bottom" id="TypeScript" order="9" weight="0.32545045" />
+      <window_info anchor="bottom" id="TypeScript" order="9" weight="0.19594595" />
       <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" />
-      <window_info active="true" anchor="bottom" id="Terminal" order="11" visible="true" weight="0.39130434" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="11" visible="true" weight="0.22297297" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
@@ -187,7 +202,7 @@
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/src/app/layout.tsx">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="206">
+        <state relative-caret-position="660">
           <caret line="34" column="25" selection-start-line="34" selection-start-column="25" selection-end-line="34" selection-end-column="25" />
           <folding>
             <element signature="e#0#37#0" expanded="true" />
@@ -197,17 +212,26 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/utils/taxCalculator.ts">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="176">
-          <caret line="8" column="18" selection-start-line="8" selection-start-column="18" selection-end-line="8" selection-end-column="18" />
+        <state relative-caret-position="154">
+          <caret line="22" column="38" selection-start-line="22" selection-start-column="38" selection-end-line="22" selection-end-column="38" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/app/page.tsx">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="301">
-          <caret line="125" column="23" lean-forward="true" selection-start-line="125" selection-start-column="23" selection-end-line="125" selection-end-column="23" />
+        <state relative-caret-position="461">
+          <caret line="529" column="25" lean-forward="true" selection-start-line="529" selection-start-column="25" selection-end-line="529" selection-end-column="25" />
           <folding>
             <element signature="e#15#46#0" expanded="true" />
+            <element signature="e#3076#3299#0" />
+            <element signature="e#3340#3465#0" />
+            <element signature="e#3522#3671#0" />
+            <element signature="e#3730#4411#0" />
+            <element signature="e#5208#5431#0" />
+            <element signature="e#5472#5597#0" />
+            <element signature="e#5654#5803#0" />
+            <element signature="e#6824#9916#0" />
+            <element signature="e#6163#9263#0" />
           </folding>
         </state>
       </provider>

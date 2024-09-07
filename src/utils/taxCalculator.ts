@@ -11,16 +11,16 @@ interface Investment {
 }
 
 interface RebateProps {
-    salary: number;
+    taxableIncome: number;
     investments: Investment[];
 }
 
-export const calculateTaxRebate = ({ salary, investments }: RebateProps) => {
+export const calculateTaxRebate = ({ taxableIncome, investments }: RebateProps) => {
     let rebate = 0;
-    if (salary <= 350000) {
+    if (taxableIncome <= 350000) {
         return 0;
     }
-    const salaryRebate = salary * 0.03;
+    const salaryRebate = taxableIncome * 0.03;
     const maxRebate = 1000000;
 
     investments.forEach(investment => {
@@ -38,7 +38,7 @@ export const calculateIncomeTax = ({ salary, gender, age }: TaxProps) => {
     if (salary <= 350000) {
         return {
             tax: 0,
-            taxableSalary: 0
+            taxableIncome: 0
         }
     }
 
@@ -64,7 +64,7 @@ export const calculateIncomeTax = ({ salary, gender, age }: TaxProps) => {
     }
 
     return {
-        taxableSalary: Math.round(salary),
+        taxableIncome: Math.round(salary),
         tax: Math.round(tax)
     };
 };
