@@ -80,7 +80,7 @@ export default function Page() {
             setPayableTax(calculatedTax.tax - rebate);
             setShowData(true);
         }
-    }, [totalIncome, taxableIncome, investments, age, gender, salary]);
+    }, [totalIncome, taxableIncome, investments, age, gender, salary, taxPaid, payableTax]);
 
 
     const handleCalculate = () => {
@@ -95,6 +95,7 @@ export default function Page() {
             paidTaxes += Number(taxData.amount);
         });
         setTaxPaid(paidTaxes);
+        setShowData(true);
     };
 
     const handleDownload = () => {
