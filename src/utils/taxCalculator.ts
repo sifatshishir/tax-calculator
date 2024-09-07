@@ -49,7 +49,7 @@ export const calculateIncomeTax = ({ salary, gender, age }: TaxProps) => {
     const thirdSlab = 500000;
     const fourthSlab = 500000;
 
-    if (salary < taxFreeAmount) {
+    if (salary <= taxFreeAmount) {
         tax = 0;
     } else if (salary <= taxFreeAmount + firstSlab) {
         tax = (salary - taxFreeAmount) * 0.05;
@@ -60,7 +60,7 @@ export const calculateIncomeTax = ({ salary, gender, age }: TaxProps) => {
     } else if (salary <= taxFreeAmount + firstSlab + secondSlab + thirdSlab + fourthSlab) {
         tax = 5000 + 40000 + 75000 + (salary - taxFreeAmount - firstSlab - secondSlab - thirdSlab) * 0.20;
     } else {
-        tax = 5000 + 40000 + 75000 + 100000 + (salary - taxFreeAmount - firstSlab - secondSlab - thirdSlab) * 0.25;
+        tax = 5000 + 40000 + 75000 + 100000 + (salary - taxFreeAmount - firstSlab - secondSlab - thirdSlab - fourthSlab) * 0.25;
     }
 
     return {
